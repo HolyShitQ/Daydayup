@@ -1,5 +1,6 @@
 package com.ddup.service;
 
+import com.ddup.dto.PaginationDTO;
 import com.ddup.dto.QuestionDTO;
 import com.ddup.mapper.QuestionMapper;
 import com.ddup.mapper.UserMapper;
@@ -21,9 +22,11 @@ public class QuestionService {
     @Autowired
     private QuestionMapper questionMapper;
 
-    public List<QuestionDTO> list() {
-        List<Question> questions = questionMapper.list();
+    public PaginationDTO list(Integer page, Integer size) {
+        Integer offset = size * (page-1);
+        List<Question> questions = questionMapper.list(offset, size);
         ArrayList<QuestionDTO> questionDTOs = new ArrayList<>();
+        PaginationDTO paginationDTO = new PaginationDTO();
         for (Question question : questions) {
             User user = userMapper.findById(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
@@ -31,6 +34,12 @@ public class QuestionService {
             questionDTO.setUser(user);
             questionDTOs.add(questionDTO);
         }
-        return questionDTOs;
+
+        Integer count = questionMapper.count();
+        paginationDTO.setPagination(count, page, size);
+
+        paginationDTO.setQuestions(questionDTOs);
+
+        return paginationDTO;
     }
 }
