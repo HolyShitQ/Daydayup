@@ -1,7 +1,6 @@
 package com.ddup.controller;
 
 import com.ddup.dto.PaginationDTO;
-import com.ddup.mapper.UserMapper;
 import com.ddup.model.User;
 import com.ddup.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class ProfileController {
-
-    @Autowired
-    UserMapper userMapper;
 
     @Autowired
     private QuestionService questionService;

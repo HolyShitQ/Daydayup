@@ -1,10 +1,7 @@
 package com.ddup.mapper;
 
 import com.ddup.model.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 @Mapper
@@ -18,4 +15,10 @@ public interface UserMapper {
 
     @Select("select * from user where id = #{id}")
     User findById(@Param("id") Integer id);
+
+    @Select("select * from user where account_id = #{accountId}")
+    User findByAccountId(@Param("accountId") String accountId);
+
+    @Update("update user set gmt_modified = #{gmtModified}, avatar_url = #{avatarUrl}, name = #{name}, token = #{token} where id = #{id}")
+    void update(User user);
 }
