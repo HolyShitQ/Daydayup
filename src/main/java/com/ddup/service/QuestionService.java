@@ -4,6 +4,7 @@ import com.ddup.dto.PaginationDTO;
 import com.ddup.dto.QuestionDTO;
 import com.ddup.exception.CustomizeErrorCode;
 import com.ddup.exception.CustomizeException;
+import com.ddup.mapper.QuestionExtMapper;
 import com.ddup.mapper.QuestionMapper;
 import com.ddup.mapper.UserMapper;
 import com.ddup.model.Question;
@@ -22,6 +23,9 @@ public class QuestionService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private QuestionExtMapper questionExtMapper;
 
     @Autowired
     private QuestionMapper questionMapper;
@@ -135,5 +139,12 @@ public class QuestionService {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
         }
+    }
+
+    public void incView(Integer id) {
+        Question question = new Question();
+        question.setId(id);
+        question.setViewCount(1);
+        questionExtMapper.incView(question);
     }
 }
