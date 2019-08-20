@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
+
 @Controller
 public class CommentController {
 
@@ -28,6 +30,8 @@ public class CommentController {
         comment.setCommentator(1);
         comment.setLikeCount(0L);
         commentMapper.insert(comment);
-        return null;
+        HashMap<Object, Object> objectObjectHashMap = new HashMap<>();
+        objectObjectHashMap.put("message", "成功");
+        return objectObjectHashMap;
     }
 }
