@@ -1,5 +1,6 @@
 package com.ddup.controller;
 
+import com.ddup.Enums.CommentTypeEnum;
 import com.ddup.dto.CommentDTO;
 import com.ddup.dto.QuestionDTO;
 import com.ddup.service.CommentService;
@@ -25,7 +26,7 @@ public class QuestionController {
     public String question(@PathVariable(name = "id") Long id, Model model){
 
         //获取评论
-        List<CommentDTO> comments = commentService.listByQuestionId(id);
+        List<CommentDTO> comments = commentService.listByTargetId(id, CommentTypeEnum.QUESTION);
 
         //增加阅读数
         questionService.incView(id);
