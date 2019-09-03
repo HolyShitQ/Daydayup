@@ -1,3 +1,6 @@
+/**
+ * 提交回复
+ * */
 function post() {
     var questionId = $("#question_id").val();
     var content = $("#comment_content").val();
@@ -33,4 +36,29 @@ function post() {
         },
         dataType: "json"
     });
+}
+
+/**
+ * 展开二级评论
+ * */
+function collapseComments(e) {
+    var id = e.getAttribute("data-id");
+    var comments = $("#comment-" + id);
+
+    var collapse = e.getAttribute("data-collapse");
+    if (collapse) {
+        //折叠
+        comments.removeClass("in");
+        //删除标记
+        e.removeAttribute("data-collapse");
+        //取消变蓝
+        e.classList.remove("active");
+    } else {
+        //展开
+        comments.addClass("in");
+        //标记为展开状态
+        e.setAttribute("data-collapse", "in");
+        //变蓝
+        e.classList.add("active");
+    }
 }
