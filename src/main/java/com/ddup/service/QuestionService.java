@@ -10,6 +10,7 @@ import com.ddup.mapper.UserMapper;
 import com.ddup.model.Question;
 import com.ddup.model.QuestionExample;
 import com.ddup.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
@@ -32,25 +34,27 @@ public class QuestionService {
 
     public PaginationDTO list(Integer page, Integer size) {
         PaginationDTO paginationDTO = new PaginationDTO();
-        Integer count = (int)questionMapper.countByExample(new QuestionExample());
+        Integer count = (int) questionMapper.countByExample(new QuestionExample());
 
         Integer totalPage;
-        if(count % size == 0) {
-            totalPage = count/size;
+        if (count % size == 0) {
+            totalPage = count / size;
         } else {
-            totalPage = count/size+1;
+            totalPage = count / size + 1;
         }
 
-        if(page < 1){
+        if (page < 1) {
             page = 1;
         }
-        if(page > totalPage){
+        if (page > totalPage) {
             page = totalPage;
         }
 
         paginationDTO.setPagination(totalPage, page);
-        Integer offset = size * (page-1);
-        List<Question> questions = questionMapper.selectByExampleWithBLOBsWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
+        Integer offset = size * (page - 1);
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.setOrderByClause("gmt_create desc");
+        List<Question> questions = questionMapper.selectByExampleWithBLOBsWithRowbounds(questionExample, new RowBounds(offset, size));
         ArrayList<QuestionDTO> questionDTOs = new ArrayList<>();
 
         for (Question question : questions) {
@@ -70,25 +74,25 @@ public class QuestionService {
 
         QuestionExample questionExample = new QuestionExample();
         questionExample.createCriteria().andCreatorEqualTo(userId);
-        Integer count = (int)questionMapper.countByExample(questionExample);
+        Integer count = (int) questionMapper.countByExample(questionExample);
 
         Integer totalPage;
-        if(count % size == 0) {
-            totalPage = count/size;
+        if (count % size == 0) {
+            totalPage = count / size;
         } else {
-            totalPage = count/size+1;
+            totalPage = count / size + 1;
         }
 
-        if(page < 1){
+        if (page < 1) {
             page = 1;
         }
-        if(page > totalPage){
+        if (page > totalPage) {
             page = totalPage;
         }
 
         paginationDTO.setPagination(totalPage, page);
 
-        Integer offset = size * (page-1);
+        Integer offset = size * (page - 1);
         QuestionExample example = new QuestionExample();
         example.createCriteria().andCreatorEqualTo(userId);
         List<Question> questions = questionMapper.selectByExampleWithBLOBsWithRowbounds(example, new RowBounds(offset, size));
@@ -109,7 +113,7 @@ public class QuestionService {
 
     public QuestionDTO getById(Long id) {
         Question question = questionMapper.selectByPrimaryKey(id);
-        if(question == null){
+        if (question == null) {
             throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
         }
         QuestionDTO questionDTO = new QuestionDTO();
@@ -120,7 +124,7 @@ public class QuestionService {
     }
 
     public void createOrUpdate(Question question) {
-        if(question.getId() == null){
+        if (question.getId() == null) {
             //创建问题
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
@@ -128,7 +132,7 @@ public class QuestionService {
             question.setCommentCount(0);
             question.setLikeCount(0);
             questionMapper.insert(question);
-        }else {
+        } else {
             question.setGmtModified(question.getGmtCreate());
 
             Question updateQuestion = new Question();
@@ -139,7 +143,7 @@ public class QuestionService {
             QuestionExample example = new QuestionExample();
             example.createCriteria().andIdEqualTo(question.getId());
             int updated = questionMapper.updateByExampleSelective(updateQuestion, example);
-            if(updated != 1){
+            if (updated != 1) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
         }
@@ -150,5 +154,24 @@ public class QuestionService {
         question.setId(id);
         question.setViewCount(1);
         questionExtMapper.incView(question);
+    }
+
+    public List<QuestionDTO> selectRelated(QuestionDTO queryDTO) {
+        if (StringUtils.isBlank(queryDTO.getTag())) {
+            return new ArrayList<>();
+        }
+        String regexpTag = queryDTO.getTag().replace(",", "|");
+        Question question = new Question();
+        question.setId(queryDTO.getId());
+        question.setTag(regexpTag);
+
+        List<Question> questions = questionExtMapper.selectRelated(question);
+        List<QuestionDTO> questionDTOS = questions.stream().map(q -> {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(q, questionDTO);
+            return questionDTO;
+        }).collect(Collectors.toList());
+
+        return questionDTOS;
     }
 }
