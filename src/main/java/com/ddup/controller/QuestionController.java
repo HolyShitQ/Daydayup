@@ -1,6 +1,6 @@
 package com.ddup.controller;
 
-import com.ddup.Enums.CommentTypeEnum;
+import com.ddup.enums.CommentTypeEnum;
 import com.ddup.dto.CommentDTO;
 import com.ddup.dto.QuestionDTO;
 import com.ddup.service.CommentService;

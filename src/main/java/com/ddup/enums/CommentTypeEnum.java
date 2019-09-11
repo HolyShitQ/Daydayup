@@ -1,4 +1,4 @@
-package com.ddup.Enums;
+package com.ddup.enums;
 
 public enum CommentTypeEnum {
     QUESTION(1),
