@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.ddup.dto.AccessTokenDTO;
 import com.ddup.dto.GithubUser;
 import okhttp3.*;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 
-@Component
+@Service
 public class GithubProvider {
     public String getAccessToken(AccessTokenDTO accessTokenDTO){
         final MediaType mediaType = MediaType.get("application/json; charset=utf-8");
