@@ -2,6 +2,7 @@ package com.ddup.service;
 
 import com.ddup.dto.PaginationDTO;
 import com.ddup.dto.QuestionDTO;
+import com.ddup.dto.QuestionQueryDTO;
 import com.ddup.exception.CustomizeErrorCode;
 import com.ddup.exception.CustomizeException;
 import com.ddup.mapper.QuestionExtMapper;
@@ -32,11 +33,20 @@ public class QuestionService {
     @Autowired
     private QuestionMapper questionMapper;
 
-    public PaginationDTO list(Integer page, Integer size) {
-        PaginationDTO<QuestionDTO> paginationDTO = new PaginationDTO<>();
-        Integer count = (int) questionMapper.countByExample(new QuestionExample());
+    public PaginationDTO list(String search, Integer page, Integer size) {
 
+        if(StringUtils.isNotBlank(search)){
+            search = search.replace(" ", "|");
+        }
+
+        PaginationDTO<QuestionDTO> paginationDTO = new PaginationDTO<>();
         Integer totalPage;
+
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(search);
+
+        Integer count = questionExtMapper.countBySearch(questionQueryDTO);
+
         if (count % size == 0) {
             totalPage = count / size;
         } else {
@@ -52,9 +62,9 @@ public class QuestionService {
 
         paginationDTO.setPagination(totalPage, page);
         Integer offset = size * (page - 1);
-        QuestionExample questionExample = new QuestionExample();
-        questionExample.setOrderByClause("gmt_create desc");
-        List<Question> questions = questionMapper.selectByExampleWithBLOBsWithRowbounds(questionExample, new RowBounds(offset, size));
+        questionQueryDTO.setSize(size);
+        questionQueryDTO.setPage(offset);
+        List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);
         ArrayList<QuestionDTO> questionDTOs = new ArrayList<>();
 
         for (Question question : questions) {
