@@ -5,6 +5,7 @@ import com.ddup.dto.GithubUser;
 import com.ddup.model.User;
 import com.ddup.provider.GithubProvider;
 import com.ddup.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Controller
+@Slf4j
 public class AuthorizeController {
 
     @Autowired
@@ -35,7 +37,7 @@ public class AuthorizeController {
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
                            @RequestParam(name = "state") String state,
-                           HttpServletResponse response){
+                           HttpServletResponse response) {
         AccessTokenDTO accessTokenDTO = new AccessTokenDTO();
         accessTokenDTO.setCode(code);
         accessTokenDTO.setState(state);
@@ -45,7 +47,7 @@ public class AuthorizeController {
         String accessToken = githubProvider.getAccessToken(accessTokenDTO);
         GithubUser githubUser = githubProvider.getUser(accessToken);
 
-        if(githubUser != null && githubUser.getId() != null){
+        if (githubUser != null && githubUser.getId() != null) {
             User user = new User();
             String token = UUID.randomUUID().toString();
             user.setToken(token);
@@ -55,14 +57,15 @@ public class AuthorizeController {
             userService.createOrUpdate(user);
             response.addCookie(new Cookie("token", token));
             return "redirect:/";
-        }else{
+        } else {
+            log.error("callback get github error,{}", githubUser);
             return "redirect:/";
         }
     }
 
     @GetMapping("/logout")
     public String logout(HttpServletRequest request,
-                         HttpServletResponse response){
+                         HttpServletResponse response) {
         request.getSession().removeAttribute("user");
         Cookie cookie = new Cookie("token", null);
         cookie.setMaxAge(0);
