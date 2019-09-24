@@ -10,7 +10,8 @@ import java.util.Date;
 @Slf4j
 public class HotTagTasks {
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 1 * * *")
     public void reportCurrentTime() {
         log.info("The time is new {}", new Date());
     }
